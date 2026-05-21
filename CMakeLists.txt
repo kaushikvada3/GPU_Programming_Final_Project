@@ -16,7 +16,7 @@ set ( CMAKE_CXX_EXTENSIONS        OFF )
 # Source
 
 set ( main
-  main.cc
+  src/main.cc
 )
 
 include_directories(src)
