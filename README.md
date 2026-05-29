@@ -6,9 +6,10 @@
 **CS/EE 147 — Spring 2026 Final Project**
 **Team:** Chris Antony, Kaushik Vada
 
-A ray tracer that renders a 3D scene of spheres with diffuse, metal, and dielectric
-materials. The project layers in two GPU optimizations on top of a CPU baseline and
-benchmarks four configurations end-to-end:
+A ray tracer that loads a triangle mesh (e.g. an OBJ exported from Fusion 360) and
+renders it with diffuse, metal, and dielectric materials. The project layers in two
+GPU optimizations on top of a CPU baseline and benchmarks four configurations
+end-to-end:
 
 1. **CPU single-threaded** baseline (port of Peter Shirley's *Ray Tracing in One Weekend*)
 2. **CUDA naive** — one thread per pixel
@@ -18,8 +19,9 @@ benchmarks four configurations end-to-end:
 ## Repository layout
 
 ```
-inc/        Header-only ray tracer (vec3, ray, sphere, materials, camera, ...)
-src/        Application entry point (main.cc)
+inc/        Header-only CPU ray tracer (vec3, ray, triangle, materials, camera, OBJ loader)
+src/        CPU application entry point (main.cc)
+cuda/       GPU ray tracer (float POD types + render.cu kernel)
 build/      Out-of-source CMake build directory (gitignored)
 ```
 
@@ -32,18 +34,25 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j
 ```
 
-## Running the CPU baseline
+## Running
+
+Both renderers take an OBJ path and write a PPM to stdout. The camera auto-frames
+the mesh, so any export lands on screen regardless of its scale or origin.
 
 ```bash
-./build/main > image.ppm
+./build/main      model.obj > cpu.ppm   # CPU baseline (config 1)
+./build/main_cuda model.obj > gpu.ppm   # CUDA naive   (config 2)
 ```
 
-Output is written as a portable pixmap (PPM) to stdout. View with any image viewer
-that supports PPM, or convert to PNG:
+View with any PPM-capable viewer, or convert to PNG:
 
 ```bash
-convert image.ppm image.png   # ImageMagick
+convert cpu.ppm cpu.png   # ImageMagick
 ```
+
+Export from Fusion 360 as OBJ. There's no BVH yet, so on a full-detail part the
+CPU renderer is very slow and even the naive GPU path scales linearly with
+triangle count — use a low/medium mesh refinement on export until Phase 3 lands.
 
 ## Cluster environment (UCR)
 
@@ -57,8 +66,8 @@ export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
 
 ## Status
 
-- [x] CPU baseline ray tracer (Week 1)
-- [ ] CUDA naive port (Week 2)
+- [x] CPU baseline ray tracer + OBJ mesh loading (Week 1)
+- [x] CUDA naive port (Week 2)
 - [ ] BVH acceleration (Week 3)
 - [ ] Dual-GPU rendering (Week 4)
 - [ ] Benchmarks + writeup (Week 5)
